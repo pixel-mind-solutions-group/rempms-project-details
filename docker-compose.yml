@@ -1,0 +1,232 @@
+
+
+volumes:
+  postgres-s-data: # Declare the named volume here
+    name: postgres-s-data
+    driver: local
+  mongo-s-data: 
+    name: mongo-s-data
+    driver: local
+  document-data: 
+    name: document-data
+    driver: local
+
+networks:
+  rempms-shared-network: # Declare the network
+    driver: bridge
+    
+services:
+    consulagent:
+            image: 'hashicorp/consul:1.20'
+            container_name: 'consulagent'
+            ports:
+                - '8500:8500'
+            healthcheck:
+                test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+            networks:
+                - rempms-shared-network
+    postgresqldb:
+            image: 'bitnami/postgresql:17.2.0'
+            container_name: 'postgresqldb'
+            ports:
+                - '5432:5432'
+                - '443:443'
+            environment:
+                - POSTGRES_USER=postgres
+                - POSTGRES_PASSWORD=123
+            volumes:
+                - postgres-s-data:/bitnami/postgresql:rw # rw: Read-write(Default) | ro: Read-only(Safer)
+            healthcheck:
+                test: ["CMD", "pg_isready", "-U", "postgres"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+            networks:
+                - rempms-shared-network
+    mongodb:
+            image: 'mongo:latest'
+            container_name: 'mongodb'
+            ports:
+                - '27017:27017'
+            volumes:
+                - mongo-s-data:/data/db:rw
+            healthcheck:
+                test: ["CMD", "mongosh", "--eval", "db.runCommand({ hello: 1 })"]
+                interval: 10s
+                timeout: 5s
+                retries: 5
+            networks:
+                - rempms-shared-network
+    rempms-api-gateway:
+            image: 'maleeshasa/rempms-api-gateway-service:0.0.1'
+            container_name: 'rempms-api-gateway-service'
+            ports:
+                - '8081:8081'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    iam-service:
+            image: 'maleeshasa/pdev-user-service:0.0.1'
+            container_name: 'iam-service'
+            ports:
+                - '9001:9001'
+            environment: 
+                - runtime_env=prod
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    pdev-kcs-service:
+            image: 'maleeshasa/kcs-v1:0.0.1'
+            container_name: 'pdev-kcs-service'
+            ports:
+                - '8202:8202'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    pdev-keycloak-service:
+            image: 'maleeshasa/pdev-keycloak-service:0.0.1'
+            container_name: 'pdev-keycloak-service'
+            ports:
+                - '8888:8888'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-recruitment-service:
+            image: 'maleeshasa/rempms-recruitment-service:0.0.1'
+            container_name: 'rempms-recruitment-service'
+            ports:
+                - '8189:8189'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-candidate-service:
+            image: 'maleeshasa/rempms-candidate-service:0.0.1'
+            container_name: 'rempms-candidate-service'
+            ports:
+                - '7080:7080'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-communication-service:
+            image: 'maleeshasa/rempms-communication-service:0.0.1'
+            container_name: 'rempms-communication-service'
+            ports:
+                - '8185:8185'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-location-service:
+            image: 'maleeshasa/rempms-location-service:0.0.1'
+            container_name: 'rempms-location-service'
+            ports:
+                - '8201:8201'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                postgresqldb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-draft-service:
+            image: 'maleeshasa/rempms-draft-service:0.0.2'
+            container_name: 'rempms-draft-service'
+            ports:
+                - '8199:8199'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - MONGODB_SERVER_ADDRESS=mongodb
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                mongodb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-document-service:
+            image: 'maleeshasa/rempms-document-service:0.0.1'
+            container_name: 'rempms-document-service'
+            ports:
+                - '8197:8197'
+            environment: 
+                - CONSUL_SERVER_ADDRESS=consulagent
+                - POSTGRES_SERVER_ADDRESS=postgresqldb
+                - DOCUMENT_PATH=/app/rempms/document-data
+            volumes:
+                - document-data:/app/rempms/document-data:rw # rw: Read-write(Default) | ro: Read-only(Safer)
+            depends_on:
+                consulagent:
+                    condition: service_healthy
+                mongodb:
+                    condition: service_healthy
+            networks:
+                - rempms-shared-network
+    rempms-candidate-fe:
+            image: 'maleeshasa/rempms-candidate-fe:0.0.1'
+            container_name: 'rempms-candidate-fe'
+            ports:
+                - '8080:80'
+            networks:
+                - rempms-shared-network
+    rempms-recruitment-fe:
+            image: 'maleeshasa/rempms-recruitment-fe:0.0.1'
+            container_name: 'rempms-recruitment-fe'
+            ports:
+                - '8181:81'
+            networks:
+                - rempms-shared-network
+      
+                
+                    
+
+    

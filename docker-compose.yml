@@ -61,7 +61,7 @@ services:
             networks:
                 - rempms-shared-network
     rempms-api-gateway:
-            image: 'maleeshasa/rempms-api-gateway-service:0.0.1'
+            image: 'maleeshasa/rempms-api-gateway-service:0.0.2'
             container_name: 'rempms-api-gateway-service'
             ports:
                 - '8081:8081'
@@ -73,12 +73,13 @@ services:
             networks:
                 - rempms-shared-network
     iam-service:
-            image: 'maleeshasa/pdev-user-service:0.0.1'
+            image: 'maleeshasa/pdev-user-service:0.0.2'
             container_name: 'iam-service'
             ports:
                 - '9001:9001'
             environment: 
                 - runtime_env=prod
+                - APP_PORT=9001
                 - CONSUL_SERVER_ADDRESS=consulagent
                 - POSTGRES_SERVER_ADDRESS=postgresqldb
             depends_on:
@@ -89,7 +90,7 @@ services:
             networks:
                 - rempms-shared-network
     pdev-kcs-service:
-            image: 'maleeshasa/kcs-v1:0.0.1'
+            image: 'maleeshasa/kcs-v1:0.0.2'
             container_name: 'pdev-kcs-service'
             ports:
                 - '8202:8202'
@@ -104,7 +105,7 @@ services:
             networks:
                 - rempms-shared-network
     pdev-keycloak-service:
-            image: 'maleeshasa/pdev-keycloak-service:0.0.1'
+            image: 'maleeshasa/pdev-keycloak-service:0.0.2'
             container_name: 'pdev-keycloak-service'
             ports:
                 - '8888:8888'
@@ -119,7 +120,7 @@ services:
             networks:
                 - rempms-shared-network
     rempms-recruitment-service:
-            image: 'maleeshasa/rempms-recruitment-service:0.0.1'
+            image: 'maleeshasa/rempms-recruitment-service:0.0.2'
             container_name: 'rempms-recruitment-service'
             ports:
                 - '8189:8189'
@@ -134,7 +135,7 @@ services:
             networks:
                 - rempms-shared-network
     rempms-candidate-service:
-            image: 'maleeshasa/rempms-candidate-service:0.0.1'
+            image: 'maleeshasa/rempms-candidate-service:0.0.2'
             container_name: 'rempms-candidate-service'
             ports:
                 - '7080:7080'
@@ -149,10 +150,10 @@ services:
             networks:
                 - rempms-shared-network
     rempms-communication-service:
-            image: 'maleeshasa/rempms-communication-service:0.0.1'
+            image: 'maleeshasa/rempms-communication-service:0.0.2'
             container_name: 'rempms-communication-service'
             ports:
-                - '8185:8185'
+                - '8184:8184'
             environment: 
                 - CONSUL_SERVER_ADDRESS=consulagent
                 - POSTGRES_SERVER_ADDRESS=postgresqldb
@@ -164,7 +165,7 @@ services:
             networks:
                 - rempms-shared-network
     rempms-location-service:
-            image: 'maleeshasa/rempms-location-service:0.0.1'
+            image: 'maleeshasa/rempms-location-service:0.0.2'
             container_name: 'rempms-location-service'
             ports:
                 - '8201:8201'
@@ -194,7 +195,7 @@ services:
             networks:
                 - rempms-shared-network
     rempms-document-service:
-            image: 'maleeshasa/rempms-document-service:0.0.1'
+            image: 'maleeshasa/rempms-document-service:0.0.2'
             container_name: 'rempms-document-service'
             ports:
                 - '8197:8197'
@@ -212,14 +213,14 @@ services:
             networks:
                 - rempms-shared-network
     rempms-candidate-fe:
-            image: 'maleeshasa/rempms-candidate-fe:0.0.1'
+            image: 'maleeshasa/rempms-candidate-fe:0.0.2'
             container_name: 'rempms-candidate-fe'
             ports:
                 - '8080:80'
             networks:
                 - rempms-shared-network
     rempms-recruitment-fe:
-            image: 'maleeshasa/rempms-recruitment-fe:0.0.1'
+            image: 'maleeshasa/rempms-recruitment-fe:0.0.2'
             container_name: 'rempms-recruitment-fe'
             ports:
                 - '8181:81'

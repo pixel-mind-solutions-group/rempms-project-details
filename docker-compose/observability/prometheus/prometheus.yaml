@@ -3,11 +3,6 @@ global:
   evaluation_interval: 5s # Evaluate rules every 5 seconds. re-evaluate metrics data by every 5 sec.
 
 scrape_configs:
-  - job_name: 'pdev-user-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'pdev-user-service:9001' ]
-      
   - job_name: 'rempms-configuration-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
@@ -38,11 +33,6 @@ scrape_configs:
     static_configs:
       - targets: [ 'rempms-document-service:8087' ]
       
-  - job_name: 'pdev-keycloak-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: [ 'pdev-keycloak-service:8823' ]
-      
   - job_name: 'rempms-location-service'
     metrics_path: '/actuator/prometheus'
     static_configs:
@@ -57,5 +47,31 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: [ 'rempms-draft-service:8186' ]
+      
+  - job_name: 'pdev-user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'pdev-user-service:9001' ]
+      
+  - job_name: 'pdev-keycloak-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'pdev-keycloak-service:8823' ]
+      
+  - job_name: 'user-management-fe'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'user-management-fe:8282' ]
+      
+  - job_name: 'rempms-recruitment-fe'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'rempms-recruitment-fe:8181' ]
+      
+  - job_name: 'rempms-candidate-fe'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'rempms-candidate-fe:8080' ]
+      
 
   

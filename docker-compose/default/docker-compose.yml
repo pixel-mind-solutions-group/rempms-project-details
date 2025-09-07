@@ -101,6 +101,18 @@ services:
     networks:
       - rempms-shared-network
 
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: tempo
+    command: -config.file /etc/tempo-config.yml
+    ports:
+      - "3110:3100"
+      - "4318:4318"
+    volumes:
+      - ../observability/tempo/tempo.yaml:/etc/tempo-config.yml
+    networks:
+      - rempms-shared-network
+
   grafana:
     image: grafana/grafana:latest
     environment:
@@ -113,34 +125,11 @@ services:
       - sh
       - -euc
       - |
-        mkdir -p /etc/grafana/provisioning/datasources
-        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
-        apiVersion: 1
-        datasources:
-          - name: Loki
-            type: loki
-            access: proxy
-            url: http://gateway:3100
-            jsonData:
-              httpHeaderName1: "X-Scope-OrgID"
-            secureJsonData:
-              httpHeaderValue1: "tenant1"
-          - name: Prometheus
-            type: prometheus
-            uid: prometheus
-            url: http://prometheus:9090
-            access: proxy
-            orgId: 1
-            basicAuth: false
-            isDefault: false
-            version: 1
-            editable: true
-            jsonData:
-              httpMethod: GET
-        EOF
         /run.sh
     ports:
       - "3000:3000"
+    volumes:
+      - ../observability/grafana/datasource.yaml:/etc/grafana/provisioning/datasources/datasource.yml
     healthcheck:
       test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
       interval: 10s
@@ -297,6 +286,11 @@ services:
       SPRING_PROFILES_ACTIVE: default
       SPRING_APPLICATION_NAME: rempms-configuration-service
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-configuration-service"
     networks:
       - rempms-shared-network
 
@@ -323,6 +317,11 @@ services:
       EUREKA_INSTANCE_HOSTNAME: rempms-eureka-service
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-eureka-service"
     networks:
       - rempms-shared-network
       
@@ -350,6 +349,11 @@ services:
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rempms-eureka-service:8070/eureka/
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-api-gateway-service"
     networks:
       - rempms-shared-network   
 
@@ -378,6 +382,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "pdev-user-service"
     networks:
       - rempms-shared-network
 
@@ -408,6 +417,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "pdev-keycloak-service"
     networks:
       - rempms-shared-network
 
@@ -467,6 +481,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-candidate-service"
     networks:
       - rempms-shared-network
       
@@ -497,6 +516,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-communication-service"
     networks:
       - rempms-shared-network
                 
@@ -527,6 +551,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-document-service"
     networks:
       - rempms-shared-network
 
@@ -557,6 +586,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       MONGODB_SERVER_ADDRESS: mongodb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-draft-service"
     networks:
       - rempms-shared-network
 
@@ -587,6 +621,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-location-service"
     networks:
       - rempms-shared-network
 
@@ -617,6 +656,11 @@ services:
       SPRING_RABBITMQ_HOST: rempms-rabbitmq
       POSTGRES_SERVER_ADDRESS: postgresqldb
       CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-recruitment-service"
     networks:
       - rempms-shared-network
 
@@ -632,7 +676,7 @@ services:
     image: "maleeshasa/rempms-recruitment-fe:v4"
     container_name: "rempms-recruitment-fe"
     ports:
-      - "8181:80"
+      - "8181:81"
     networks:
       - rempms-shared-network
                 
@@ -640,7 +684,7 @@ services:
     image: "maleeshasa/user-management-fe:v4"
     container_name: "user-management-fe"
     ports:
-      - "8282:80"
+      - "8282:82"
     networks:
       - rempms-shared-network
       

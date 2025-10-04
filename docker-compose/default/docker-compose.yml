@@ -7,8 +7,11 @@ volumes:
   mongo-s-data: 
     name: mongo-s-data
     driver: local
-  document-data: 
+  document-data:
     name: document-data
+    driver: local
+  kafka-kraft-data:
+    name: kafka-kraft-data
     driver: local
     
 services:
@@ -221,7 +224,7 @@ services:
       - rempms-shared-network
       
   postgresqldb:
-    image: 'bitnami/postgresql:17.5.0'
+    image: 'bitnamilegacy/postgresql:17.5.0'
     container_name: 'postgresqldb'
     ports:
       - '5432:5432'
@@ -252,6 +255,27 @@ services:
       retries: 20
     networks:
       - rempms-shared-network
+      
+  # rempms-kafka:
+    # image: confluentinc/cp-kafka:7.7.5
+    # container_name: rempms-kafka
+    # ports:
+      # - "9092:9092"
+    # environment:
+      # KAFKA_KRAFT_MODE: 'true'
+      # CLUSTER_ID: '1L6g7nGhU-eAKfL--X25wo'
+      # KAFKA_NODE_ID: 1
+      # KAFKA_PROCESS_ROLES: broker,controller
+      # KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      # KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      # KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      # KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+    # volumes:
+      # - kafka-kraft-data:/var/lib/kafka/data
+    # networks:
+      # - rempms-shared-network
 
   rempms-rabbitmq:
     image: "rabbitmq:4-management"
@@ -269,7 +293,7 @@ services:
       - rempms-shared-network
       
   rempms-configuration-service:
-    image: "maleeshasa/rempms-configuration-service:v4"
+    image: "maleeshasa/rempms-configuration-service:v4-LTS"
     container_name: rempms-configuration-service
     ports:
       - "8071:8071"
@@ -295,7 +319,7 @@ services:
       - rempms-shared-network
 
   rempms-eureka-service:
-    image: "maleeshasa/rempms-eureka-service:v4"
+    image: "maleeshasa/rempms-eureka-service:v4-LTS"
     container_name: rempms-eureka-service
     ports:
       - "8070:8070"
@@ -326,7 +350,7 @@ services:
       - rempms-shared-network
       
   rempms-api-gateway-service:
-    image: "maleeshasa/rempms-api-gateway-service:v4"
+    image: "maleeshasa/rempms-api-gateway-service:v4-LTS"
     container_name: rempms-api-gateway-service
     ports:
       - "8081:8081"
@@ -358,7 +382,7 @@ services:
       - rempms-shared-network   
 
   pdev-user-service:
-    image: "maleeshasa/pdev-user-service:v4"
+    image: "maleeshasa/pdev-user-service:v4-LTS"
     container_name: pdev-user-service
     ports:
       - "9001:9001"
@@ -391,7 +415,7 @@ services:
       - rempms-shared-network
 
   pdev-keycloak-service:
-    image: "maleeshasa/pdev-keycloak-service:v4"
+    image: "maleeshasa/pdev-keycloak-service:v4-LTS"
     container_name: pdev-keycloak-service
     ports:
       - "8823:8823"
@@ -426,7 +450,7 @@ services:
       - rempms-shared-network
 
   pdev-kcs-service:
-    image: "maleeshasa/pdev-kcs-service:v4"
+    image: "maleeshasa/pdev-kcs-service:v4-LTS"
     container_name: pdev-kcs-service
     ports:
       - "8201:8201"
@@ -455,7 +479,7 @@ services:
       - rempms-shared-network
 
   rempms-candidate-service:
-    image: "maleeshasa/rempms-candidate-service:v4"
+    image: "maleeshasa/rempms-candidate-service:v4-LTS"
     container_name: rempms-candidate-service
     ports:
       - "8088:8088"
@@ -490,7 +514,7 @@ services:
       - rempms-shared-network
       
   rempms-communication-service:
-    image: "maleeshasa/rempms-communication-service:v4"
+    image: "maleeshasa/rempms-communication-service:v4-LTS"
     container_name: rempms-communication-service
     ports:
       - "8083:8083"
@@ -525,7 +549,7 @@ services:
       - rempms-shared-network
                 
   rempms-document-service:
-    image: "maleeshasa/rempms-document-service:v4"
+    image: "maleeshasa/rempms-document-service:v4-LTS"
     container_name: rempms-document-service
     ports:
       - "8087:8087"
@@ -560,7 +584,7 @@ services:
       - rempms-shared-network
 
   rempms-draft-service:
-    image: "maleeshasa/rempms-draft-service:v4"
+    image: "maleeshasa/rempms-draft-service:v4-LTS"
     container_name: rempms-draft-service
     ports:
       - "8186:8186"
@@ -595,7 +619,7 @@ services:
       - rempms-shared-network
 
   rempms-location-service:
-    image: "maleeshasa/rempms-location-service:v4"
+    image: "maleeshasa/rempms-location-service:v4-LTS"
     container_name: rempms-location-service
     ports:
       - "8084:8084"
@@ -630,7 +654,7 @@ services:
       - rempms-shared-network
 
   rempms-recruitment-service:
-    image: "maleeshasa/rempms-recruitment-service:v4"
+    image: "maleeshasa/rempms-recruitment-service:v4-LTS"
     container_name: rempms-recruitment-service
     ports:
       - "8086:8086"
@@ -665,7 +689,7 @@ services:
       - rempms-shared-network
 
   rempms-candidate-fe:
-    image: "maleeshasa/rempms-candidate-fe:v4"
+    image: "maleeshasa/rempms-candidate-fe:v4-LTS"
     container_name: "rempms-candidate-fe"
     ports:
       - "8080:80"
@@ -673,7 +697,7 @@ services:
       - rempms-shared-network
       
   rempms-recruitment-fe:
-    image: "maleeshasa/rempms-recruitment-fe:v4"
+    image: "maleeshasa/rempms-recruitment-fe:v4-LTS"
     container_name: "rempms-recruitment-fe"
     ports:
       - "8181:81"
@@ -681,7 +705,7 @@ services:
       - rempms-shared-network
                 
   user-management-fe:
-    image: "maleeshasa/user-management-fe:v4"
+    image: "maleeshasa/user-management-fe:v4-LTS"
     container_name: "user-management-fe"
     ports:
       - "8282:82"

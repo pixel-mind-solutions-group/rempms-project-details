@@ -260,8 +260,9 @@ services:
     image: docker.io/bitnamilegacy/kafka:3.9
     container_name: rempms-kafka
     ports:
-      - "9092:9092"  # external access (Spring Boot running on host)
+      - "9092:9092"
       - "9093:9093"  # controller communication (internal only)
+      - "9094:9094"  # external access (Spring Boot running on host)
     volumes:
       - kafka-kraft-data:/bitnami/kafka-data
     environment:

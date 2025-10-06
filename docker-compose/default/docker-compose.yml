@@ -400,7 +400,7 @@ services:
       OTEL_LOGS_EXPORTER: none
       OTEL_SERVICE_NAME: "rempms-api-gateway-service"
     networks:
-      - rempms-shared-network   
+      - rempms-shared-network
 
   pdev-user-service:
     image: "maleeshasa/pdev-user-service:v4-LTS"
@@ -432,6 +432,7 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
       OTEL_SERVICE_NAME: "pdev-user-service"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "rempms-kafka:9092"
     networks:
       - rempms-shared-network
 
@@ -706,6 +707,37 @@ services:
       OTEL_METRICS_EXPORTER: none
       OTEL_LOGS_EXPORTER: none
       OTEL_SERVICE_NAME: "rempms-recruitment-service"
+    networks:
+      - rempms-shared-network
+
+  rempms-notification-service:
+    image: "maleeshasa/rempms-notification-service:v4-LTS"
+    container_name: rempms-notification-service
+    ports:
+      - "2222:2222"
+    healthcheck:
+      test: "curl --fail --silent localhost:9001/actuator/health/readiness | grep UP || exit 1"
+      interval: 20s
+      timeout: 20s
+      retries: 20
+      start_period: 10s
+    depends_on:
+      rempms-eureka-service:
+        condition: service_healthy
+      rempms-configuration-service:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_APPLICATION_NAME: rempms-notification-service
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://rempms-eureka-service:8070/eureka/
+      POSTGRES_SERVER_ADDRESS: postgresqldb
+      CONFIG_SERVER_URL: http://rempms-configuration-service:8071/
+      JAVA_TOOL_OPTIONS: "-javaagent:/app/libs/opentelemetry-javaagent-2.11.0.jar"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://tempo:4318
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      OTEL_SERVICE_NAME: "rempms-notification-service"
+      SPRING_CLOUD_STREAM_KAFKA_BINDER_BROKERS: "rempms-kafka:9092"
     networks:
       - rempms-shared-network
 

@@ -58,6 +58,11 @@ scrape_configs:
     static_configs:
       - targets: [ 'pdev-keycloak-service:8823' ]
       
+  - job_name: 'rempms-notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'rempms-notification-service:2222' ]
+      
   - job_name: 'user-management-fe'
     metrics_path: '/actuator/prometheus'
     static_configs:
